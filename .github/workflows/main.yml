@@ -1,8 +1,6 @@
 name: CI devops 2024
-
-
 on:
-  # Trigger workflow on push and pull request to main and develop branches
+  #to begin you want to launch this job in main and develop
   push:
     branches:
       - main
@@ -11,99 +9,62 @@ on:
     branches:
       - main
       - develop
-
 jobs:
-  test-backend:
+  test-backend: 
     runs-on: ubuntu-22.04
-
     steps:
-      # Checkout your GitHub code
-      - name: Checkout repository
-        uses: actions/checkout@v2.5.0
+     #checkout your github code using actions/checkout@v2.5.0
+      - uses: actions/checkout@v2.5.0
 
-      # Set up JDK 17
+     #do the same with another action (actions/setup-java@v3) that enable to setup jdk 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'  # Use JDK 17 for the project
           distribution: 'temurin'
 
-      # Build and test your app with Maven
+     #finally build your app with the latest command
       - name: Build and test with Maven
-        working-directory: simple-api  # Ensure the directory path is correct
-        run: mvn clean verify
-       
-  sonarcloud-analysis:
-    needs: test-backend
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      - name: Build, Test, and Analyze with SonarCloud
         working-directory: simple-api
-        run: mvn -B verify sonar:sonar \
-          -Dsonar.projectKey=zayed1313_devops-livecoding \
-          -Dsonar.organization=zayed1313 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          --file ./pom.xml
-        
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=zayed1313_devops-livecoding -Dsonar.organization=zayed1313 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./pom.xml
+
+    # define job to build and publish docker image
   build-and-push-docker-image:
-    needs: test-backend  # Attend que le job test-backend se termine
-    runs-on: ubuntu-22.04
-    steps:
-      # Checkout du code
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      # Connexion à Docker Hub
-      - name: Login to DockerHub
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Build et push de l'image Docker
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./simple-api  # Répertoire contenant le Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
-          push: ${{ github.ref == 'refs/heads/main' }}  # Push uniquement sur la branche main  
-  build-and-push-docker-image-database:
-    needs: test-backend
-    runs-on: ubuntu-22.04
-    steps:
-      # Checkout du code
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      # Connexion à Docker Hub
-      - name: Login to DockerHub
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Build et push de l'image Docker pour la base de données
-      - name: Build and Push Docker Image (Database)
-        uses: docker/build-push-action@v3
-        with:
-          context: ./database
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
-
-  build-and-push-docker-image-httpd:
-    needs: test-backend
-    runs-on: ubuntu-22.04
-    steps:
-      # Checkout du code
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      # Connexion à Docker Hub
-      - name: Login to DockerHub
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Build et push de l'image Docker pour HTTPD
-      - name: Build and Push Docker Image (HTTPD)
-        uses: docker/build-push-action@v3
-        with:
-          context: ./http-server
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+   needs: test-backend
+   # run only when code is compiling and tests are passing
+   runs-on: ubuntu-22.04
+  
+   # steps to perform in job
+   steps:
+     - name: Checkout code
+       uses: actions/checkout@v2.5.0
+       
+     - name: Login to DockerHub
+       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+  
+     - name: Build image and push backend
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./simple-api
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKER_USERNAME}}/tp-devops-simple-api:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+  
+     - name: Build image and push database
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./database
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKER_USERNAME}}/tp-devops-database:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
+         
+     - name: Build image and push httpd
+       uses: docker/build-push-action@v3
+       with:
+         # relative path to the place where source code with Dockerfile is located
+         context: ./http-server
+         # Note: tags has to be all lower-case
+         tags:  ${{secrets.DOCKER_USERNAME}}/tp-devops-http-server:latest
+         push: ${{ github.ref == 'refs/heads/main' }}
