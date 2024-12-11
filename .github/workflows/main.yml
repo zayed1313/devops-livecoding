@@ -31,23 +31,12 @@ jobs:
       # Build and test your app with Maven
       - name: Build and test with Maven
         working-directory: simple-api  # Ensure the directory path is correct
-        run: mvn clean verify
-       
-  sonarcloud-analysis:
-    needs: test-backend
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      - name: Build, Test, and Analyze with SonarCloud
-        working-directory: simple-api
         run: mvn -B verify sonar:sonar \
-          -Dsonar.projectKey=zayed1313_devops-livecoding \
-          -Dsonar.organization=zayed1313 \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          --file ./pom.xml
+         -Dsonar.projectKey=zayed1313_devops-livecoding \
+         -Dsonar.organization=zayed1313 \
+         -Dsonar.host.url=https://sonarcloud.io \
+         -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+         --file ./pom.xml
         
   build-and-push-docker-image:
     needs: test-backend  # Attend que le job test-backend se termine
