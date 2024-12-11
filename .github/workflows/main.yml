@@ -1,5 +1,6 @@
 name: CI devops 2024
 
+
 on:
   # Trigger workflow on push and pull request to main and develop branches
   push:
