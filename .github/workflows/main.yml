@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v2.5.0
 
       - name: Build, Test, and Analyze with SonarCloud
+        working-directory: ./simple-api
         run: mvn -B verify sonar:sonar \
           -Dsonar.projectKey=zayed1313_devops-livecoding \
           -Dsonar.organization=zayed1313 \
