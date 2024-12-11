@@ -51,3 +51,42 @@ jobs:
           context: ./simple-api  # Répertoire contenant le Dockerfile
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
           push: ${{ github.ref == 'refs/heads/main' }}  # Push uniquement sur la branche main  
+  build-and-push-docker-image-database:
+    needs: test-backend
+    runs-on: ubuntu-22.04
+    steps:
+      # Checkout du code
+      - name: Checkout code
+        uses: actions/checkout@v2.5.0
+
+      # Connexion à Docker Hub
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build et push de l'image Docker pour la base de données
+      - name: Build and Push Docker Image (Database)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./database
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
+
+  build-and-push-docker-image-httpd:
+    needs: test-backend
+    runs-on: ubuntu-22.04
+    steps:
+      # Checkout du code
+      - name: Checkout code
+        uses: actions/checkout@v2.5.0
+
+      # Connexion à Docker Hub
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build et push de l'image Docker pour HTTPD
+      - name: Build and Push Docker Image (HTTPD)
+        uses: docker/build-push-action@v3
+        with:
+          context: ./httpd
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
