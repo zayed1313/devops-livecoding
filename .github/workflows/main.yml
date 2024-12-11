@@ -31,12 +31,13 @@ jobs:
       # Build and test your app with Maven
       - name: Build and test with Maven
         working-directory: simple-api  # Ensure the directory path is correct
-        run: mvn -X clean verify sonar:sonar \
-         -Dsonar.projectKey=zayed1313_devops-livecoding \
-         -Dsonar.organization=zayed1313 \
-         -Dsonar.host.url=https://sonarcloud.io \
-         -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-         --file ./pom.xml
+        run: mvn clean verify sonar:sonar \
+          -Dsonar.projectKey=zayed1313_devops-livecoding \
+          -Dsonar.organization=zayed1313 \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          --file ./simple-api/pom.xml
+
         
   build-and-push-docker-image:
     needs: test-backend  # Attend que le job test-backend se termine
