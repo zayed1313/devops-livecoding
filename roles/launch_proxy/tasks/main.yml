@@ -1,0 +1,15 @@
+---
+# tasks file for roles/launch_proxy
+# Launch proxy container
+- name: Launch proxy container
+  docker_container:
+    name: my_proxy
+    image: zayed13/tp-devops-http-server
+    state: started
+    networks: [{"name" : "my_app_network"}]
+  
+    ports:
+      - "80:80"
+      - "443:443"
+   
+

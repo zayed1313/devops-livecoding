@@ -1,0 +1,10 @@
+---
+# tasks file for roles/launch_database
+- name: Launch database container
+  docker_container:
+    name: my-db
+    image: zayed13/tp-devops-database           # Image officielle PostgreSQL
+    state: started
+    networks: [{"name" : "my_app_network"}]       # Réseau Docker partagé
+    ports:
+     - 5432:5432
